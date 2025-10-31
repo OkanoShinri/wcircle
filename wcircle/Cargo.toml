@@ -1,0 +1,13 @@
+[package]
+name = "wcircle"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+evdev = "0.13"        # /dev/input/* からのイベント取得
+uinput = "0.1"        # 仮想入力デバイスを生成
+anyhow = "1"          # エラーハンドリング簡略化
+log = "0.4"           # ロギングAPI
+env_logger = "0.11"   # ログ出力用
+serde = { version = "1", features = ["derive"] }  # 設定ファイル
+toml = "0.9"
