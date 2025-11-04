@@ -55,10 +55,8 @@ typedef struct {
     // デバイス座標 -> 正規化用
     int x_min, x_max, y_min, y_max;
     double cx, cy; // 中心
-    double r_max;  // 正規化半径（x/yスケール差をならすため、長辺半径を採用）
 
     // 状態
-    bool touching;
     double last_angle;     // unwrap 済みの直前角
     double accum_angle;    // 累積角
     bool is_first_touch;      // 開始判定用
@@ -129,50 +127,28 @@ static void maybe_grab(app_t *a, int on){
     }
 }
 
-static void begin_touch(app_t *a){
-    LOG("begin touch");
-    a->touching = true;
-    a->scrolling = false;
-    a->accum_angle = 0.0;
-    a->is_first_touch = true;
-    a->last_angle  = 0.0; // 初期化は最初の座標更新時に
-}
-
-static void end_touch(app_t *a){
-    a->touching = false;
-    maybe_grab(a, 0);
-    a->scrolling = false;
-    LOG("end touch. touching=%d, is_first_touch=%d, last_angle=%.5f", a->touching, a->is_first_touch, a->last_angle);
-}
-
-static bool is_in_touch_area(double nx, double ny, app_t *a){
+static bool is_in_touch_area(int x, int y, app_t *a){
+    double nx = (double)(x - a->x_min) / (double)(a->x_max - a->x_min) * 2.0 - 1.0;
+                // let nx = (x - x_min) / (x_max - x_min) * 2.0 - 1.0; // -1〜1に正規化
+    double ny = (double)(y - a->y_min) / (double)(a->y_max - a->y_min) * 2.0 - 1.0;
     double r = sqrt(nx*nx + ny*ny);
-    double outer_min = a->cfg.outer_ratio_min;
-    double outer_max = a->cfg.outer_ratio_max;
-    return (r >= outer_min && r <= outer_max);
+    LOG("x=%d, xmin=%d, xmax=%d",x, a->x_min,a->x_max);
+    LOG("nx=%.5f, ny=%.5f, r=%.5f",nx,ny,r);
+    return (r >= a->cfg.outer_ratio_min && r <= a->cfg.outer_ratio_max);
 }
 
-static void update_xy(app_t *a, int x, int y){
-    // デバイス座標 -> 中心基準の正規化（楕円 -> 単位スクエア）
-    double nx = (x - a->cx) / (double)(a->r_max);
-    double ny = (y - a->cy) / (double)(a->r_max);
+static double to_ang(int x, int y, app_t *a){
+    double nx = ((double)x - a->x_min) / (double_t)(a->x_max - a->x_min) * 2.0 - 1.0;
+                // let nx = (x - x_min) / (x_max - x_min) * 2.0 - 1.0; // -1〜1に正規化
+    double ny = ((double)y - a->y_min) / (double)(a->y_max - a->y_min) *2.0 - 1.0;
     double ang = atan2(ny, nx);
 
-    // LOG("This is update_xy(). a->touching=%d, ang=%.1f", a->touching, ang);
+    return ang;
+}
 
-    if (a->is_first_touch){
-        // 1点目
-        if (!is_in_touch_area(nx, ny, a)){
-            return;
-        }
-        a->is_first_touch = false;
-        a->last_angle = ang;
-        LOG("This is first touch. x=%.5f, y=%.5f, ang=last angle=%.5f",nx,ny,ang);
-        return;
-    }
-
+static void update_xy(int x, int y, app_t *a){
+    double ang = to_ang(x, y, a);
     double d = angle_diff(ang, a->last_angle);
-    LOG("x=%.5f, y=%.5f, last angle=%.5f, current angle=%.5f, angle diff=%.5f.",nx, ny, a->last_angle, ang, d);
     a->last_angle = a->last_angle + d; // unwrap
 
     // 円周部のみをスクロール対象に
@@ -180,7 +156,7 @@ static void update_xy(app_t *a, int x, int y){
     // LOG("ang=%.1f", ang);
 
     // 角度変化量は半径にも少し依存させたいが、まずはリング範囲内のみ反応
-    if (is_in_touch_area(nx, ny, a)){
+    if (is_in_touch_area(x, y, a)){
         a->accum_angle += d;
 
         if (!a->scrolling && fabs(a->accum_angle) >= a->cfg.start_arc_rad){
@@ -198,22 +174,25 @@ static void update_xy(app_t *a, int x, int y){
                 a->accum_angle -= dir * a->cfg.step_rad;
             }
         }
-    } else {
-        // 外周から外れたら停止方向に向かう（ヒステリシス）
-        if (a->scrolling){
-            if (fabs(a->accum_angle) < a->cfg.hysteresis_rad){
-                a->scrolling = false;
-                maybe_grab(a, 0);
-                LOG("scroll stop (ring exit)");
-            }
-        }
     }
+    // else {
+    //     // 外周から外れたら停止方向に向かう（ヒステリシス）
+    //     if (a->scrolling){
+    //         if (fabs(a->accum_angle) < a->cfg.hysteresis_rad){
+    //             a->scrolling = false;
+    //             maybe_grab(a, 0);
+    //             LOG("scroll stop (ring exit)");
+    //         }
+    //     }
+    // }
 }
+
+//static void 
 
 static void run(const char *device_path){
     app_t a = {0};
     a.cfg = (config_t){
-        .outer_ratio_min = 0.50,
+        .outer_ratio_min = 0.70,
         .outer_ratio_max = 1.415,
         .start_arc_rad   = 5.0*DEG2RAD,
         .step_rad        = 5.0*DEG2RAD,
@@ -236,52 +215,95 @@ static void run(const char *device_path){
     a.x_min = xi->minimum; a.x_max = xi->maximum;
     a.y_min = yi->minimum; a.y_max = yi->maximum;
 
-    a.cx = (a.x_min + a.x_max) * 0.5;
-    a.cy = (a.y_min + a.y_max) * 0.5;
-    // 長辺を基準に半径を決定（円形/楕円の両対応）
-    double rx = (a.x_max - a.x_min) * 0.5;
-    double ry = (a.y_max - a.y_min) * 0.5;
-    a.r_max = fmax(rx, ry);
+    double cx = (a.x_min + a.x_max) * 0.5;
+    double cy = (a.y_min + a.y_max) * 0.5;
 
     a.uifd = setup_uinput();
-    LOG("ready. device=%s center=(%.1f,%.1f) rmax=%.1f", device_path, a.cx, a.cy, a.r_max);
+    LOG("ready. device=%s center=(%.1f,%.1f)", device_path, cx, cy);
 
-    int curr_x = (int)a.cx, curr_y = (int)a.cy;
+    int curr_x = (int)cx, curr_y = (int)cy;
 
     bool is_x_updated=false;
     bool is_y_updated=false;
+
+    int event_type=0;
+    int event_code=0;
+    int event_value=0;
+
+    typedef enum {NONE, FIRST, STARTED_IN_AREA, STARTED_NOT_IN_AREA, END} event_state;
+    event_state state=NONE; 
+    
     // Event check loop
     while (1){
         struct input_event ev;
         int rc = libevdev_next_event(a.dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
         if (rc == 0) {
-            LOG("[Event check loop] event recieved: ev.type=%hu ev.code=%d ev.value=%d", ev.type, ev.code, ev.value);
-            if (ev.type == EV_KEY/*3*/ && ev.code == BTN_TOUCH/*330(0x14a)*/){
-                LOG("[Event check loop] begin/end touch event");
-                if (ev.value == 1) {
-                    begin_touch(&a);
-                    is_x_updated = false;
-                    is_y_updated = false;
+            // LOG("[Event check loop] event recieved: ev.type=%hu ev.code=%d ev.value=%d", ev.type, ev.code, ev.value);
+            event_type=ev.type;
+            event_code=ev.code;
+            event_value=ev.value;
+
+            if (event_type == EV_KEY && event_code == BTN_TOUCH && event_value == 1) {state=FIRST;LOG("FIRST touch detected");}
+            if (event_type == EV_KEY && event_code == BTN_TOUCH && event_value == 0) state=END;
+
+            if (event_type == EV_ABS && event_code == ABS_X) curr_x=event_value;
+            if (event_type == EV_ABS && event_code == ABS_Y) curr_y=event_value;
+
+            
+            if (event_type == EV_SYN && event_code == SYN_REPORT && event_value == 0) {
+                //イベント実行
+                switch (state) {
+                case FIRST:
+                    if (is_in_touch_area(curr_x, curr_y, &a)){
+                        state=STARTED_IN_AREA;
+                        a.scrolling = false;
+                        a.accum_angle = 0.0;
+                        a.last_angle = to_ang(curr_x, curr_y, &a);
+                        maybe_grab(&a, 1);
+                        LOG("begin touch");
+                    } else {
+                        state=STARTED_NOT_IN_AREA;
+                    }
+                    break;
+                case STARTED_IN_AREA:
+                    update_xy(curr_x, curr_y, &a);
+                    break;
+                case END:
+                    state=FIRST;
+                    maybe_grab(&a, 0);
+                    break;
+                default:
+                    break;
                 }
-                else{
-                    end_touch(&a);
-                }
-            } else if (a.touching && ev.type == EV_ABS/*3*/ ){
-                // LOG("[Event check loop] update xy");
-                if (ev.code == ABS_X/*0*/ ) {
-                    curr_x = ev.value;
-                    is_x_updated = true;
-                    // LOG("[Event check loop] curr_x=%d",curr_x);
-                }
-                else if (ev.code == ABS_Y/*1*/ ) {
-                    curr_y = ev.value;
-                    is_y_updated = true;
-                    // LOG("[Event check loop] curr_y=%d",curr_y);
-                }
-            } else if (ev.type == EV_SYN && ev.code == SYN_DROPPED){
-                // 取りこぼし時は再同期
-                libevdev_next_event(a.dev, LIBEVDEV_READ_FLAG_SYNC, &ev);
             }
+
+            
+            // if (ev.type == EV_ABS/*3*/ && ev.code == BTN_TOUCH/*330(0x14a)*/){
+            //     LOG("[Event check loop] begin/end touch event");
+            //     if (ev.value == 1) {
+            //         begin_touch(&a);
+            //         is_x_updated = false;
+            //         is_y_updated = false;
+            //     }
+            //     else{
+            //         end_touch(&a);
+            //     }
+            // } else if (a.touching && ev.type == EV_ABS/*3*/ ){
+            //     // LOG("[Event check loop] update xy");
+            //     if (ev.code == ABS_X/*0*/ ) {
+            //         curr_x = ev.value;
+            //         is_x_updated = true;
+            //         // LOG("[Event check loop] curr_x=%d",curr_x);
+            //     }
+            //     else if (ev.code == ABS_Y/*1*/ ) {
+            //         curr_y = ev.value;
+            //         is_y_updated = true;
+            //         // LOG("[Event check loop] curr_y=%d",curr_y);
+            //     }
+            // } else if (ev.type == EV_SYN && ev.code == SYN_DROPPED){
+            //     // 取りこぼし時は再同期
+            //     libevdev_next_event(a.dev, LIBEVDEV_READ_FLAG_SYNC, &ev);
+            // }
         } else if (rc == -EAGAIN){
             // 少し待つ
             usleep(1000);
@@ -289,12 +311,6 @@ static void run(const char *device_path){
             // デバイス切断など
             LOG("libevdev rc=%d -> exit", rc);
             break;
-        }
-        if (is_x_updated&&is_y_updated){
-            // LOG("[Event check loop] update xy");
-            is_x_updated=false;
-            is_y_updated=false;
-            update_xy(&a, curr_x, curr_y);
         }
     }
 
