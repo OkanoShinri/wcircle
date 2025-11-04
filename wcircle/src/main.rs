@@ -17,12 +17,19 @@ fn main() -> Result<()> {
     let r_min = cfg.r_min;
     let r_max = cfg.r_max;
     let invert = cfg.invert;
-    let angle_step = cfg.angle_step_deg;
+    let step_sensitivity = cfg.sensitivity;
     let _vertical = cfg.axis == "vertical";
     let x_min = cfg.x_min;
     let x_max = cfg.x_max;
     let y_min = cfg.y_min;
     let y_max = cfg.y_max;
+
+    println!("r_min: {}", r_min);
+    println!("r_max: {}", r_max);
+    println!("x_min: {}", x_min);
+    println!("x_max: {}", x_max);
+    println!("y_min: {}", y_min);
+    println!("y_max: {}", y_max);
 
     let mut last_x = None;
     let mut last_y = None;
@@ -35,7 +42,7 @@ fn main() -> Result<()> {
         .event(relative::Wheel::Vertical)?
         .create()?;
 
-    println!("wcircle: Listening on /dev/input/event16 ...");
+    println!("wcircle: Listening on {} ...",cfg.device);
 
     loop {
         for ev in device.fetch_events()? {
@@ -54,7 +61,10 @@ fn main() -> Result<()> {
                 let r = (nx * nx + ny * ny).sqrt();
 
                 // リング帯の外周判定
-                if r >= r_max && r <= r_min {
+                // debug
+                let r_max=10.0;
+                let r_min=0.5;
+                if r >= r_min && r <= r_max {
                     let theta = ny.atan2(nx); // -π〜π
                     if let Some(prev_theta) = last_theta {
                         let mut dtheta: f64 = theta - prev_theta;
@@ -66,24 +76,49 @@ fn main() -> Result<()> {
                             dtheta += 2.0 * PI;
                         }
 
-                        theta_acc += dtheta.to_degrees();
+                        theta_acc += dtheta.to_degrees()*1000.0;
+                        // debug
+                        let test_step_sensitivity=1.0;
+                        let angle_step_degree=10.0;
 
-                        // しきい超過時にスクロール送出
-                        while theta_acc.abs() >= angle_step {
-                            let scroll_dir = if invert {-1} else {1};
-                            let mut delta = scroll_dir;
+                        println!("theta_acc: {}",theta_acc);
+                        
+
+                        if theta_acc.abs()>angle_step_degree{       
+                            let scroll_dir = if invert {-1.0} else {1.0};
+                            let steps = (theta_acc.abs()*test_step_sensitivity*scroll_dir/angle_step_degree) as i32;
+                            println!("steps: {}", steps);
+
                             if theta_acc > 0.0 {
                                 // 時計回り → 下方向（正スクロール）
-                                udev.send(relative::Wheel::Vertical, delta)?;
+                                udev.send(relative::Wheel::Vertical, steps)?;
                                 println!("scroll ↓");
                             } else {
-                                delta *= -1;
-                                // 反時計回り → 上方向
-                                udev.send(relative::Wheel::Vertical, delta)?;
-                                println!("scroll ↑");
+                                    // 反時計回り → 上方向
+                                udev.send(relative::Wheel::Vertical, -steps)?;
+                                println!("scroll ↑");                         
                             }
-                            theta_acc -= angle_step * (scroll_dir as f64);
+                            theta_acc=0.0;
+                        
                         }
+
+
+                        // しきい超過時にスクロール送出
+                        // while theta_acc.abs() >= angle_step {
+                            // let scroll_dir = if invert {-1} else {1};
+                            // let mut delta = scroll_dir;
+                            // if theta_acc > 0.0 {
+                                // 時計回り → 下方向（正スクロール）
+                                // udev.send(relative::Wheel::Vertical, delta)?;
+                                // println!("scroll ↓");
+                            // } else {
+                                // delta *= -1;
+                                // 反時計回り → 上方向
+                                // udev.send(relative::Wheel::Vertical, delta)?;
+                                // println!("scroll ↑");
+                            // }
+                            // theta_acc -= angle_step * (scroll_dir as f64);
+                        // }
                     }
                     last_theta = Some(theta);
                 } else {
@@ -92,6 +127,8 @@ fn main() -> Result<()> {
                     theta_acc = 0.0;
                 }
 
+                // last_theta = None;
+                // theta_acc = 0.0;
                 last_x = None;
                 last_y = None;
             }
