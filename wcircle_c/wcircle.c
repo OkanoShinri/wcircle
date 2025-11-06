@@ -144,13 +144,16 @@ static void update_xy_before_scroll(int x, int y, app_t *a){
     a->accum_angle += d;
 
     if (!is_in_touch_area(x, y, a)){
+        if (a->staying_in_area){
+        LOG("Out of area. Scrolling will not begin.");
+        }
         a->staying_in_area=false;
     }
 
     if (a->staying_in_area && fabs(a->accum_angle)>=a->cfg.start_arc_rad){
         a->scrolling=true;
         maybe_grab(a, 1);
-        LOG("scroll start");
+        LOG("Scroll will start.");
     }
 }
 
@@ -176,11 +179,11 @@ static void run(const char *device_path){
     a.cfg = (config_t){
         .outer_ratio_min = 0.70,
         .outer_ratio_max = 1.415,
-        .start_arc_rad   = 5.0*DEG2RAD,
-        .step_rad        = 5.0*DEG2RAD,
+        .start_arc_rad   = 18.0*DEG2RAD,
+        .step_rad        = 10.0*DEG2RAD,
         .wheel_step      = 1,
         .grab_on_scroll  = 1,
-        .wheel_hi_res    = 1,
+        .wheel_hi_res    = 0,
     };
 
     a.infd = open(device_path, O_RDONLY | O_NONBLOCK);
@@ -233,7 +236,7 @@ static void run(const char *device_path){
             event_code=ev.code;
             event_value=ev.value;
 
-            if (event_type == EV_KEY && event_code == BTN_TOUCH && event_value == 1) {state=FIRST;LOG("FIRST touch detected");}
+            if (event_type == EV_KEY && event_code == BTN_TOUCH && event_value == 1) state=FIRST;
             if (event_type == EV_KEY && event_code == BTN_TOUCH && event_value == 0) state=END;
 
             if (event_type == EV_ABS && event_code == ABS_X) curr_x=event_value;
@@ -250,15 +253,18 @@ static void run(const char *device_path){
                         a.scrolling = false;
                         a.accum_angle = 0.0;
                         a.last_angle = to_ang(curr_x, curr_y, &a);
-                        LOG("begin touch");
+                        LOG("First touch detected, begin touch");
                     } else {
                         state=STARTED_NOT_IN_AREA;
+                        LOG("First touch detected, but this is not in area. grab=%d",a.grabbed);
                     }
                     break;
                 case STARTED_IN_AREA:
                     // 外周部で閾値以上回転したらスクロールスタート
                     update_xy_before_scroll(curr_x, curr_y, &a);
-                    if (a.scrolling) state=SCROLLING;
+                    if (a.scrolling) {
+                        state=SCROLLING;
+                    }
                     break;
                 case SCROLLING:
                     update_xy_while_scroll(curr_x, curr_y, &a);
@@ -266,6 +272,7 @@ static void run(const char *device_path){
                 case END:
                     state=FIRST;
                     maybe_grab(&a, 0);
+                    LOG("end touch, grab=%d",a.grabbed);
                     break;
                 default:
                     break;
