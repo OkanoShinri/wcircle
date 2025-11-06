@@ -44,6 +44,7 @@ typedef struct {
     double hysteresis_rad;    // 停止判定のヒステリシス
     int    wheel_step;        // REL_WHEEL の1発あたり値（一般的には ±1、HiRes は別拡張で）
     int    grab_on_scroll;    // スクロール中は元デバイスをグラブ（1=true）
+    int    wheel_hi_res;      // 高解像度を用いるか否か(1=REL_WHEEL_HI_RES, 0=REL_WHEEL)
 } config_t;
 
 typedef struct {
@@ -100,8 +101,6 @@ static int setup_uinput(){
 }
 
 static void emit_rel(int fd, int code, int value){
-    
-    LOG("emit start");
     struct input_event ev;
     memset(&ev, 0, sizeof(ev));
     // clock_gettime(CLOCK_MONOTONIC, &ev.time);
@@ -112,7 +111,6 @@ static void emit_rel(int fd, int code, int value){
     // clock_gettime(CLOCK_MONOTONIC, &ev.time);
     ev.type = EV_SYN; ev.code = SYN_REPORT; ev.value = 0;
     if (write(fd, &ev, sizeof(ev)) < 0) perror("write SYN");
-    LOG("emit end");
 }
 
 static void maybe_grab(app_t *a, int on){
@@ -129,17 +127,13 @@ static void maybe_grab(app_t *a, int on){
 
 static bool is_in_touch_area(int x, int y, app_t *a){
     double nx = (double)(x - a->x_min) / (double)(a->x_max - a->x_min) * 2.0 - 1.0;
-                // let nx = (x - x_min) / (x_max - x_min) * 2.0 - 1.0; // -1〜1に正規化
     double ny = (double)(y - a->y_min) / (double)(a->y_max - a->y_min) * 2.0 - 1.0;
     double r = sqrt(nx*nx + ny*ny);
-    LOG("x=%d, xmin=%d, xmax=%d",x, a->x_min,a->x_max);
-    LOG("nx=%.5f, ny=%.5f, r=%.5f",nx,ny,r);
     return (r >= a->cfg.outer_ratio_min && r <= a->cfg.outer_ratio_max);
 }
 
 static double to_ang(int x, int y, app_t *a){
     double nx = ((double)x - a->x_min) / (double_t)(a->x_max - a->x_min) * 2.0 - 1.0;
-                // let nx = (x - x_min) / (x_max - x_min) * 2.0 - 1.0; // -1〜1に正規化
     double ny = ((double)y - a->y_min) / (double)(a->y_max - a->y_min) *2.0 - 1.0;
     double ang = atan2(ny, nx);
 
@@ -169,8 +163,9 @@ static void update_xy(int x, int y, app_t *a){
             // 発火
             while (fabs(a->accum_angle) >= a->cfg.step_rad){
                 int dir = (a->accum_angle > 0) ? 1 : -1;
-                emit_rel(a->uifd, REL_WHEEL_HI_RES, dir * a->cfg.wheel_step);
-                // LOG("dir * a->cfg.wheel_step: %d\n",dir * a->cfg.wheel_step);
+                int mode = (a->cfg.wheel_hi_res) ? REL_WHEEL_HI_RES : REL_WHEEL;
+                emit_rel(a->uifd, mode, dir * a->cfg.wheel_step);
+                LOG("dir * a->cfg.wheel_step: %d\n",dir * a->cfg.wheel_step);
                 a->accum_angle -= dir * a->cfg.step_rad;
             }
         }
@@ -199,6 +194,7 @@ static void run(const char *device_path){
         .hysteresis_rad  = 2.0*DEG2RAD,
         .wheel_step      = 1,
         .grab_on_scroll  = 1,
+        .wheel_hi_res    = 1,
     };
 
     a.infd = open(device_path, O_RDONLY | O_NONBLOCK);
