@@ -18,7 +18,6 @@
 #include <libevdev-1.0/libevdev/libevdev.h>
 
 #define DIE(...)  do { fprintf(stderr, __VA_ARGS__); fprintf(stderr, "\n"); exit(1);} while(0)
-// #define LOG(...)  do { fprintf(stderr, __VA_ARGS__); fprintf(stderr, "\n"); } while(0)
 
 #define LOG(...) do { \
     static unsigned long _log_counter = 0; \
@@ -41,7 +40,6 @@ typedef struct {
     double outer_ratio_max;   // 外周リングの外側境界（比）例: 1.05 (若干はみ出し許容)
     double start_arc_rad;     // スクロール開始判定: 累積角度 [rad]
     double step_rad;          // 1ホイール発火あたりの角度 [rad]（小さくすると高分解能）
-    double hysteresis_rad;    // 停止判定のヒステリシス
     int    wheel_step;        // REL_WHEEL の1発あたり値（一般的には ±1、HiRes は別拡張で）
     int    grab_on_scroll;    // スクロール中は元デバイスをグラブ（1=true）
     int    wheel_hi_res;      // 高解像度を用いるか否か(1=REL_WHEEL_HI_RES, 0=REL_WHEEL)
@@ -136,7 +134,6 @@ static double to_ang(int x, int y, app_t *a){
     double nx = ((double)x - a->x_min) / (double_t)(a->x_max - a->x_min) * 2.0 - 1.0;
     double ny = ((double)y - a->y_min) / (double)(a->y_max - a->y_min) *2.0 - 1.0;
     double ang = atan2(ny, nx);
-
     return ang;
 }
 
@@ -146,9 +143,6 @@ static void update_xy(int x, int y, app_t *a){
     a->last_angle = a->last_angle + d; // unwrap
 
     // 円周部のみをスクロール対象に
-
-    // LOG("ang=%.1f", ang);
-
     // 角度変化量は半径にも少し依存させたいが、まずはリング範囲内のみ反応
     if (is_in_touch_area(x, y, a)){
         a->accum_angle += d;
@@ -170,19 +164,7 @@ static void update_xy(int x, int y, app_t *a){
             }
         }
     }
-    // else {
-    //     // 外周から外れたら停止方向に向かう（ヒステリシス）
-    //     if (a->scrolling){
-    //         if (fabs(a->accum_angle) < a->cfg.hysteresis_rad){
-    //             a->scrolling = false;
-    //             maybe_grab(a, 0);
-    //             LOG("scroll stop (ring exit)");
-    //         }
-    //     }
-    // }
 }
-
-//static void 
 
 static void run(const char *device_path){
     app_t a = {0};
@@ -191,7 +173,6 @@ static void run(const char *device_path){
         .outer_ratio_max = 1.415,
         .start_arc_rad   = 5.0*DEG2RAD,
         .step_rad        = 5.0*DEG2RAD,
-        .hysteresis_rad  = 2.0*DEG2RAD,
         .wheel_step      = 1,
         .grab_on_scroll  = 1,
         .wheel_hi_res    = 1,
@@ -274,28 +255,6 @@ static void run(const char *device_path){
             }
 
             
-            // if (ev.type == EV_ABS/*3*/ && ev.code == BTN_TOUCH/*330(0x14a)*/){
-            //     LOG("[Event check loop] begin/end touch event");
-            //     if (ev.value == 1) {
-            //         begin_touch(&a);
-            //         is_x_updated = false;
-            //         is_y_updated = false;
-            //     }
-            //     else{
-            //         end_touch(&a);
-            //     }
-            // } else if (a.touching && ev.type == EV_ABS/*3*/ ){
-            //     // LOG("[Event check loop] update xy");
-            //     if (ev.code == ABS_X/*0*/ ) {
-            //         curr_x = ev.value;
-            //         is_x_updated = true;
-            //         // LOG("[Event check loop] curr_x=%d",curr_x);
-            //     }
-            //     else if (ev.code == ABS_Y/*1*/ ) {
-            //         curr_y = ev.value;
-            //         is_y_updated = true;
-            //         // LOG("[Event check loop] curr_y=%d",curr_y);
-            //     }
             // } else if (ev.type == EV_SYN && ev.code == SYN_DROPPED){
             //     // 取りこぼし時は再同期
             //     libevdev_next_event(a.dev, LIBEVDEV_READ_FLAG_SYNC, &ev);
