@@ -58,7 +58,7 @@ typedef struct {
     // 状態
     double last_angle;     // unwrap 済みの直前角
     double accum_angle;    // 累積角
-    bool is_first_touch;      // 開始判定用
+    bool staying_in_area;      // 開始判定エリアに留まっているか(開始判定用)
     bool scrolling;        // スクロールモード中か
     config_t cfg;
 } app_t;
@@ -137,45 +137,53 @@ static double to_ang(int x, int y, app_t *a){
     return ang;
 }
 
-static void update_xy(int x, int y, app_t *a){
+static void update_xy_before_scroll(int x, int y, app_t *a){
     double ang = to_ang(x, y, a);
     double d = angle_diff(ang, a->last_angle);
     a->last_angle = a->last_angle + d; // unwrap
+    a->accum_angle += d;
 
-    // 円周部のみをスクロール対象に
-    // 角度変化量は半径にも少し依存させたいが、まずはリング範囲内のみ反応
-    if (is_in_touch_area(x, y, a)){
-        a->accum_angle += d;
-
-        if (!a->scrolling && fabs(a->accum_angle) >= a->cfg.start_arc_rad){
-            a->scrolling = true;
-            maybe_grab(a, 1); // ここから元デバイスを握ってポインタ動作を止める
-            LOG("scroll start");
+    if (!is_in_touch_area(x, y, a)){
+        if (a->staying_in_area){
+        LOG("Out of area. Scrolling will not begin.");
         }
+        a->staying_in_area=false;
+    }
 
-        if (a->scrolling){
-            // 発火
-            while (fabs(a->accum_angle) >= a->cfg.step_rad){
-                int dir = (a->accum_angle > 0) ? 1 : -1;
-                int mode = (a->cfg.wheel_hi_res) ? REL_WHEEL_HI_RES : REL_WHEEL;
-                emit_rel(a->uifd, mode, dir * a->cfg.wheel_step);
-                LOG("dir * a->cfg.wheel_step: %d\n",dir * a->cfg.wheel_step);
-                a->accum_angle -= dir * a->cfg.step_rad;
-            }
-        }
+    if (a->staying_in_area && fabs(a->accum_angle)>=a->cfg.start_arc_rad){
+        a->scrolling=true;
+        maybe_grab(a, 1);
+        LOG("Scroll will start.");
     }
 }
+
+static void update_xy_while_scroll(int x, int y, app_t *a){
+    double ang = to_ang(x, y, a);
+    double d = angle_diff(ang, a->last_angle);
+    a->last_angle = a->last_angle + d; // unwrap
+    a->accum_angle += d;
+
+    // 発火
+    while (fabs(a->accum_angle) >= a->cfg.step_rad){
+        int dir = (a->accum_angle > 0) ? 1 : -1;
+        int mode = (a->cfg.wheel_hi_res) ? REL_WHEEL_HI_RES : REL_WHEEL;
+        emit_rel(a->uifd, mode, dir * a->cfg.wheel_step);
+        LOG("dir * a->cfg.wheel_step: %d\n",dir * a->cfg.wheel_step);
+        a->accum_angle -= dir * a->cfg.step_rad;
+    }
+}
+    
 
 static void run(const char *device_path){
     app_t a = {0};
     a.cfg = (config_t){
         .outer_ratio_min = 0.70,
         .outer_ratio_max = 1.415,
-        .start_arc_rad   = 5.0*DEG2RAD,
-        .step_rad        = 5.0*DEG2RAD,
+        .start_arc_rad   = 18.0*DEG2RAD,
+        .step_rad        = 10.0*DEG2RAD,
         .wheel_step      = 1,
         .grab_on_scroll  = 1,
-        .wheel_hi_res    = 1,
+        .wheel_hi_res    = 0,
     };
 
     a.infd = open(device_path, O_RDONLY | O_NONBLOCK);
@@ -207,11 +215,19 @@ static void run(const char *device_path){
     int event_code=0;
     int event_value=0;
 
-    typedef enum {NONE, FIRST, STARTED_IN_AREA, STARTED_NOT_IN_AREA, END} event_state;
+    typedef enum {
+        NONE,                //0
+        FIRST,               //1
+        STARTED_IN_AREA,     //2
+        STARTED_NOT_IN_AREA, //3
+        SCROLLING,           //4
+        END                  //5
+    } event_state;
     event_state state=NONE; 
     
     // Event check loop
     while (1){
+        // LOG("MODE=%d, grab=%d",state,a.grabbed);
         struct input_event ev;
         int rc = libevdev_next_event(a.dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
         if (rc == 0) {
@@ -220,7 +236,7 @@ static void run(const char *device_path){
             event_code=ev.code;
             event_value=ev.value;
 
-            if (event_type == EV_KEY && event_code == BTN_TOUCH && event_value == 1) {state=FIRST;LOG("FIRST touch detected");}
+            if (event_type == EV_KEY && event_code == BTN_TOUCH && event_value == 1) state=FIRST;
             if (event_type == EV_KEY && event_code == BTN_TOUCH && event_value == 0) state=END;
 
             if (event_type == EV_ABS && event_code == ABS_X) curr_x=event_value;
@@ -233,21 +249,30 @@ static void run(const char *device_path){
                 case FIRST:
                     if (is_in_touch_area(curr_x, curr_y, &a)){
                         state=STARTED_IN_AREA;
+                        a.staying_in_area = true;
                         a.scrolling = false;
                         a.accum_angle = 0.0;
                         a.last_angle = to_ang(curr_x, curr_y, &a);
-                        maybe_grab(&a, 1);
-                        LOG("begin touch");
+                        LOG("First touch detected, begin touch");
                     } else {
                         state=STARTED_NOT_IN_AREA;
+                        LOG("First touch detected, but this is not in area. grab=%d",a.grabbed);
                     }
                     break;
                 case STARTED_IN_AREA:
-                    update_xy(curr_x, curr_y, &a);
+                    // 外周部で閾値以上回転したらスクロールスタート
+                    update_xy_before_scroll(curr_x, curr_y, &a);
+                    if (a.scrolling) {
+                        state=SCROLLING;
+                    }
+                    break;
+                case SCROLLING:
+                    update_xy_while_scroll(curr_x, curr_y, &a);
                     break;
                 case END:
                     state=FIRST;
                     maybe_grab(&a, 0);
+                    LOG("end touch, grab=%d",a.grabbed);
                     break;
                 default:
                     break;
