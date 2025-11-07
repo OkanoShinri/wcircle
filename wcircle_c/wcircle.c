@@ -43,6 +43,7 @@ typedef struct {
     int    wheel_step;        // REL_WHEEL の1発あたり値（一般的には ±1、HiRes は別拡張で）
     int    grab_on_scroll;    // スクロール中は元デバイスをグラブ（1=true）
     int    wheel_hi_res;      // 高解像度を用いるか否か(1=REL_WHEEL_HI_RES, 0=REL_WHEEL)
+    bool   invert_scroll;     // false=時計回りで下、true=時計回りで上
 } config_t;
 
 typedef struct {
@@ -165,11 +166,12 @@ static void update_xy_while_scroll(int x, int y, app_t *a){
 
     // 発火
     while (fabs(a->accum_angle) >= a->cfg.step_rad){
-        int dir = (a->accum_angle > 0) ? 1 : -1;
+        int dir = (a->accum_angle > 0) ? -1 : 1;
+        dir *= (a->cfg.invert_scroll) ? -1 : 1;
         int mode = (a->cfg.wheel_hi_res) ? REL_WHEEL_HI_RES : REL_WHEEL;
         emit_rel(a->uifd, mode, dir * a->cfg.wheel_step);
         LOG("dir * a->cfg.wheel_step: %d\n",dir * a->cfg.wheel_step);
-        a->accum_angle -= dir * a->cfg.step_rad;
+        a->accum_angle += dir * a->cfg.step_rad;
     }
 }
     
@@ -180,10 +182,11 @@ static void run(const char *device_path){
         .outer_ratio_min = 0.70,
         .outer_ratio_max = 1.415,
         .start_arc_rad   = 18.0*DEG2RAD,
-        .step_rad        = 10.0*DEG2RAD,
+        .step_rad        = 18.0*DEG2RAD,
         .wheel_step      = 1,
         .grab_on_scroll  = 1,
         .wheel_hi_res    = 0,
+        .invert_scroll   = false,
     };
 
     a.infd = open(device_path, O_RDONLY | O_NONBLOCK);
