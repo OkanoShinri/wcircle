@@ -1,0 +1,307 @@
+[00001] [2025-11-13 15:53:27] [DEBUG] ready. device=/dev/input/event16 center=(3472.0,2927.0)
+[00001] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=57 ev.value=77
+[00002] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=5605
+[00003] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2259
+[00004] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=58 ev.value=38
+[00005] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=1 ev.code=330 ev.value=1
+[00006] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=5605
+[00007] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2259
+[00008] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=38
+[00009] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=1 ev.code=325 ev.value=1
+[00010] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+[00001] [2025-11-13 15:53:29] [DEBUG] First touch detected, begin touch
+
+[00011] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2255
+[00012] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=58 ev.value=44
+[00013] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2255
+[00014] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=44
+[00015] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00016] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=5604
+[00017] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2253
+[00018] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=58 ev.value=48
+[00019] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=5604
+[00020] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2253
+[00021] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=48
+[00022] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00023] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2249
+[00024] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=58 ev.value=52
+[00025] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2249
+[00026] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=52
+[00027] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00028] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=5602
+[00029] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2246
+[00030] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=58 ev.value=55
+[00031] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=5602
+[00032] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2246
+[00033] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=55
+[00034] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00035] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=5596
+[00036] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2253
+[00037] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=58 ev.value=58
+[00038] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=5596
+[00039] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2253
+[00040] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=58
+[00041] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00042] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=5593
+[00043] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2263
+[00044] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=58 ev.value=60
+[00045] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=5593
+[00046] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2263
+[00047] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=60
+[00048] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00049] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=5592
+[00050] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2297
+[00051] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=58 ev.value=61
+[00052] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=5592
+[00053] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2297
+[00054] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=61
+[00055] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00056] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=5589
+[00057] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2351
+[00058] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=5589
+[00059] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2351
+[00060] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00061] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2419
+[00062] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2419
+[00063] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00064] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=5586
+[00065] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2486
+[00066] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=58 ev.value=62
+[00067] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=5586
+[00068] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2486
+[00069] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=62
+[00070] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00071] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2574
+[00072] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=58 ev.value=63
+[00073] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2574
+[00074] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=63
+[00075] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00076] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2690
+[00077] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2690
+[00078] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00079] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=5585
+[00080] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2799
+[00081] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=5585
+[00082] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2799
+[00083] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00084] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=5578
+[00085] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2882
+[00086] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=58 ev.value=64
+[00087] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=5578
+[00088] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2882
+[00089] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=64
+[00090] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+[00001] [2025-11-13 15:53:29] [DEBUG] Scroll will start.
+
+[00091] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=5577
+[00092] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2947
+[00093] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=5577
+[00094] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2947
+[00095] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+[00001] [2025-11-13 15:53:29] [DEBUG] dir * a->cfg.wheel_step: -1
+
+[00096] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=5573
+[00097] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=3011
+[00098] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=5573
+[00099] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=3011
+[00100] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00101] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=5570
+[00102] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=3074
+[00103] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=58 ev.value=60
+[00104] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=5570
+[00105] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=3074
+[00106] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=60
+[00107] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00108] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=5571
+[00109] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=3136
+[00110] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=58 ev.value=54
+[00111] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=5571
+[00112] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=3136
+[00113] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=54
+[00114] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00115] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=57 ev.value=-1
+[00116] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=1 ev.code=330 ev.value=0
+[00117] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=0
+[00118] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=1 ev.code=325 ev.value=0
+[00119] [2025-11-13 15:53:29] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+[00001] [2025-11-13 15:53:29] [DEBUG] end touch, grab=0
+
+[00120] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=57 ev.value=78
+[00121] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=3409
+[00122] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2599
+[00123] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=58 ev.value=49
+[00124] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=1 ev.code=330 ev.value=1
+[00125] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=3409
+[00126] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2599
+[00127] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=49
+[00128] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=1 ev.code=325 ev.value=1
+[00129] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+[00001] [2025-11-13 15:53:31] [DEBUG] First touch detected, but this is not in area. grab=0
+
+[00130] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=3413
+[00131] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2603
+[00132] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=58 ev.value=69
+[00133] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=3413
+[00134] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2603
+[00135] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=69
+[00136] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00137] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=3419
+[00138] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2604
+[00139] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=58 ev.value=70
+[00140] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=3419
+[00141] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2604
+[00142] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=70
+[00143] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00144] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=3433
+[00145] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2599
+[00146] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=58 ev.value=72
+[00147] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=3433
+[00148] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2599
+[00149] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=72
+[00150] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00151] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=3464
+[00152] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2593
+[00153] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=3464
+[00154] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2593
+[00155] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00156] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=3515
+[00157] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2572
+[00158] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=3515
+[00159] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2572
+[00160] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00161] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=3581
+[00162] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2547
+[00163] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=3581
+[00164] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2547
+[00165] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00166] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=3648
+[00167] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2521
+[00168] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=58 ev.value=71
+[00169] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=3648
+[00170] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2521
+[00171] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=71
+[00172] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00173] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=3712
+[00174] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2497
+[00175] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=58 ev.value=68
+[00176] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=3712
+[00177] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2497
+[00178] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=68
+[00179] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00180] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=3771
+[00181] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2472
+[00182] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=58 ev.value=63
+[00183] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=3771
+[00184] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2472
+[00185] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=63
+[00186] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00187] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=3826
+[00188] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2446
+[00189] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=58 ev.value=51
+[00190] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=3826
+[00191] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2446
+[00192] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=51
+[00193] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00194] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=57 ev.value=-1
+[00195] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=1 ev.code=330 ev.value=0
+[00196] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=0
+[00197] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=1 ev.code=325 ev.value=0
+[00198] [2025-11-13 15:53:31] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+[00002] [2025-11-13 15:53:31] [DEBUG] end touch, grab=0
+
+[00199] [2025-11-13 15:53:32] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=57 ev.value=79
+[00200] [2025-11-13 15:53:32] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=3605
+[00201] [2025-11-13 15:53:32] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2455
+[00202] [2025-11-13 15:53:32] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=58 ev.value=60
+[00203] [2025-11-13 15:53:32] [DEBUG] [Event check loop] event recieved: ev.type=1 ev.code=330 ev.value=1
+[00204] [2025-11-13 15:53:32] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=3605
+[00205] [2025-11-13 15:53:32] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2455
+[00206] [2025-11-13 15:53:32] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=60
+[00207] [2025-11-13 15:53:32] [DEBUG] [Event check loop] event recieved: ev.type=1 ev.code=325 ev.value=1
+[00208] [2025-11-13 15:53:32] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+[00002] [2025-11-13 15:53:32] [DEBUG] First touch detected, but this is not in area. grab=0
+
+[00209] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=3609
+[00210] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2463
+[00211] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=58 ev.value=73
+[00212] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=3609
+[00213] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2463
+[00214] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=73
+[00215] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00216] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=3611
+[00217] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2464
+[00218] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=58 ev.value=72
+[00219] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=3611
+[00220] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2464
+[00221] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=72
+[00222] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00223] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=3629
+[00224] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2451
+[00225] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=58 ev.value=71
+[00226] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=3629
+[00227] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2451
+[00228] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=71
+[00229] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00230] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=3673
+[00231] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2419
+[00232] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=58 ev.value=67
+[00233] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=3673
+[00234] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2419
+[00235] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=67
+[00236] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00237] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=3732
+[00238] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2377
+[00239] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=58 ev.value=59
+[00240] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=3732
+[00241] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2377
+[00242] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=59
+[00243] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00244] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=53 ev.value=3810
+[00245] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=54 ev.value=2338
+[00246] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=58 ev.value=52
+[00247] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=0 ev.value=3810
+[00248] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=1 ev.value=2338
+[00249] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=52
+[00250] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00251] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=58 ev.value=36
+[00252] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=36
+[00253] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+
+[00254] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=57 ev.value=-1
+[00255] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=1 ev.code=330 ev.value=0
+[00256] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=3 ev.code=24 ev.value=0
+[00257] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=1 ev.code=325 ev.value=0
+[00258] [2025-11-13 15:53:33] [DEBUG] [Event check loop] event recieved: ev.type=0 ev.code=0 ev.value=0
+[00003] [2025-11-13 15:53:33] [DEBUG] end touch, grab=0

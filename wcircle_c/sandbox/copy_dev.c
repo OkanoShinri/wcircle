@@ -138,6 +138,7 @@ int main(int argc, char **argv) {
     ioctl(ufd, UI_DEV_SETUP, &usetup);
     ioctl(ufd, UI_DEV_CREATE);
 
+    if (libevdev_new_from_fd(a.infd, &a.dev) < 0) DIE("libevdev_new_from_fd");
     printf("Created uinput device '%s_clone'\n", name);
     printf("Capabilities copied from %s\n", src);
     printf("Device ready. Press Ctrl+C to exit.\n");
