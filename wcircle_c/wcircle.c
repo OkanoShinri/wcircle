@@ -68,30 +68,45 @@ static inline double angle_diff(double a, double b){
     return d;
 }
 
-static int setup_uinput(){
-    int fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
-    if (fd < 0) DIE("open /dev/uinput: %s", strerror(errno));
+struct libevdev_uinput* create_virtual_mouse(void)
+{
+    struct libevdev *dev = libevdev_new();
+    struct libevdev_uinput *uidev;
+    int rc;
 
-    // REL_WHEEL を持つ仮想デバイス    if (ioctl(fd, UI_SET_EVBIT, EV_REL) < 0) DIE("UI_SET_EVBIT EV_REL");
-    if (ioctl(fd, UI_SET_RELBIT, REL_WHEEL) < 0) DIE("UI_SET_RELBIT REL_WHEEL");
-    if (ioctl(fd, UI_SET_RELBIT, REL_WHEEL_HI_RES) < 0) DIE("UI_SET_RELBIT REL_WHEEL_HI_RES");
-    if (ioctl(fd, UI_SET_RELBIT, REL_HWHEEL) < 0) DIE("UI_SET_RELBIT REL_HWHEEL"); // 将来の水平対応用
+    if (!dev) {
+        fprintf(stderr, "Failed to create libevdev device\n");
+        return NULL;
+    }
 
-    // 必須
-    if (ioctl(fd, UI_SET_EVBIT, EV_SYN) < 0) DIE("UI_SET_EVBIT EV_SYN");
+    libevdev_set_name(dev, "Virtual Circular Scrolling Mouse");
+    libevdev_set_id_bustype(dev, BUS_USB);
+    libevdev_set_id_vendor(dev, 0x1234);
+    libevdev_set_id_product(dev, 0x5678);
+    libevdev_set_id_version(dev, 1);
 
-    struct uinput_setup usetup = {0};
-    snprintf(usetup.name, sizeof(usetup.name), "wcircle-virtual-wheel");
-    usetup.id.bustype = BUS_VIRTUAL;
-    usetup.id.vendor  = 0x1234;
-    usetup.id.product = 0x5678;
-    usetup.id.version = 1;
+    libevdev_enable_event_type(dev, EV_KEY);
+    libevdev_enable_event_code(dev, EV_KEY, BTN_LEFT, NULL);
+    libevdev_enable_event_code(dev, EV_KEY, BTN_RIGHT, NULL);
 
-    if (ioctl(fd, UI_DEV_SETUP, &usetup) < 0) DIE("UI_DEV_SETUP");
-    if (ioctl(fd, UI_DEV_CREATE) < 0) DIE("UI_DEV_CREATE");
-    // デバイスが出来るまで少し待機
-    usleep(10000);
-    return fd;
+    libevdev_enable_event_type(dev, EV_REL);
+    libevdev_enable_event_code(dev, EV_REL, REL_X, NULL);
+    libevdev_enable_event_code(dev, EV_REL, REL_Y, NULL);
+    libevdev_enable_event_code(dev, EV_REL, REL_WHEEL, NULL);
+
+    /* ------- uinput 仮想デバイス作成 ------- */
+    rc = libevdev_uinput_create_from_device(dev,
+        LIBEVDEV_UINPUT_OPEN_MANAGED,
+        &uidev);
+
+    libevdev_free(dev);
+
+    if (rc != 0) {
+        fprintf(stderr, "Failed to create uinput device: %s\n", strerror(-rc));
+        return NULL;
+    }
+
+    return uidev;
 }
 
 static bool is_in_touch_area(int x, int y, app_t *a){
@@ -169,7 +184,7 @@ static void run(const char *device_path){
     int infd = open(device_path, O_RDONLY | O_NONBLOCK);
     if (infd < 0) DIE("open input: %s", strerror(errno));
 
-    // デバイス作成
+    // タッチパッドデバイス作成
     if (libevdev_new_from_fd(infd, &a.dev) < 0) DIE("libevdev_new_from_fd");
     fprintf(stderr, "Input device name: \"%s\"\n", libevdev_get_name(a.dev));
     fprintf(stderr, "Input device ID: bus %#x vendor %#x product %#x\n",
