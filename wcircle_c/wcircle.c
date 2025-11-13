@@ -20,13 +20,11 @@
 #define DIE(...)  do { fprintf(stderr, __VA_ARGS__); fprintf(stderr, "\n"); exit(1);} while(0)
 
 #define LOG(...) do { \
-    static unsigned long _log_counter = 0; \
-    _log_counter++; \
     time_t t = time(NULL); \
     struct tm *tm_info = localtime(&t); \
     char time_buf[20]; \
     strftime(time_buf, sizeof(time_buf), "%Y-%m-%d %H:%M:%S", tm_info); \
-    fprintf(stderr, "[%05lu] [%s] [DEBUG] ", _log_counter, time_buf); \
+    fprintf(stderr, "[%s] [DEBUG] ", time_buf); \
     fprintf(stderr, __VA_ARGS__); \
     fprintf(stderr, "\n"); \
 } while(0)
@@ -36,8 +34,8 @@
 
 typedef struct {
     // 検出パラメータ（後で設定ファイル化）
-    double outer_ratio_min;   // 外周リングの内側境界（中心からの比）例: 0.70
-    double outer_ratio_max;   // 外周リングの外側境界（比）例: 1.05 (若干はみ出し許容)
+    double outer_ratio_min;   // 外周リングの内側境界（中心からの比）
+    double outer_ratio_max;   // 外周リングの外側境界（比)
     double start_arc_rad;     // スクロール開始判定: 累積角度 [rad]
     double step_rad;          // 1ホイール発火あたりの角度 [rad]（小さくすると高分解能）
     int    wheel_step;        // REL_WHEEL の1発あたり値（一般的には ±1）
@@ -46,16 +44,13 @@ typedef struct {
 } config_t;
 
 typedef struct {
-    struct libevdev *dev;
-    struct libevdev_uinput *uidev;
-
     // デバイス座標
     int x_min, x_max, y_min, y_max;
 
     // 状態
     double last_angle;     // unwrap 済みの直前角
     double accum_angle;    // 累積角
-    bool staying_in_area;      // 開始判定エリアに留まっているか(開始判定用)
+    bool staying_in_area;  // 開始判定エリアに留まっているか(開始判定用)
     bool scrolling;        // スクロールモード中か
     config_t cfg;
 } app_t;
@@ -94,7 +89,7 @@ struct libevdev_uinput* create_virtual_mouse(void)
     libevdev_enable_event_code(dev, EV_REL, REL_Y, NULL);
     libevdev_enable_event_code(dev, EV_REL, REL_WHEEL, NULL);
 
-    /* ------- uinput 仮想デバイス作成 ------- */
+    // uinput 仮想デバイス作成
     rc = libevdev_uinput_create_from_device(dev,
         LIBEVDEV_UINPUT_OPEN_MANAGED,
         &uidev);
@@ -142,7 +137,7 @@ static void update_xy_before_scroll(int x, int y, app_t *a){
     }
 }
 
-static void update_xy_while_scroll(int x, int y, app_t *a){
+static void update_xy_while_scroll(int x, int y, app_t *a, struct libevdev_uinput *mouse_uidev){
     double ang = to_ang(x, y, a);
     double d = angle_diff(ang, a->last_angle);
     a->last_angle = a->last_angle + d;
@@ -157,11 +152,11 @@ static void update_xy_while_scroll(int x, int y, app_t *a){
         struct input_event ev;
         memset(&ev, 0, sizeof(ev));
         ev.type = EV_REL; ev.code = code; ev.value = dir * a->cfg.wheel_step;
-        if (libevdev_uinput_write_event(a->uidev, ev.type, ev.code, ev.value)<0) DIE("Failed to write EV_REL");
+        if (libevdev_uinput_write_event(mouse_uidev, ev.type, ev.code, ev.value)<0) DIE("Failed to write EV_REL");
         LOG("write scroll event: ev.type=%hu ev.code=%d ev.value=%d", ev.type, ev.code, ev.value);
         memset(&ev, 0, sizeof(ev));
         ev.type = EV_SYN; ev.code = SYN_REPORT; ev.value = 0;
-        if (libevdev_uinput_write_event(a->uidev, ev.type, ev.code, ev.value)<0) DIE("Failed to write SYN");
+        if (libevdev_uinput_write_event(mouse_uidev, ev.type, ev.code, ev.value)<0) DIE("Failed to write SYN");
 
         LOG("dir * a->cfg.wheel_step: %d\n",dir * a->cfg.wheel_step);
         a->accum_angle += dir * a->cfg.step_rad;
@@ -174,48 +169,44 @@ static void run(const char *device_path){
     a.cfg = (config_t){
         .outer_ratio_min = 0.70,
         .outer_ratio_max = 1.415,
-        .start_arc_rad   = 10.0*DEG2RAD,
+        .start_arc_rad   = 5.0*DEG2RAD,
         .step_rad        = 18.0*DEG2RAD,
         .wheel_step      = 1,
         .wheel_hi_res    = 0,
         .invert_scroll   = false,
     };
 
+    struct libevdev *orig_dev;
+    struct libevdev_uinput *pad_uidev;
+    struct libevdev_uinput *mouse_uidev;
+    
     int infd = open(device_path, O_RDONLY | O_NONBLOCK);
     if (infd < 0) DIE("open input: %s", strerror(errno));
 
-    // タッチパッドデバイス作成
-    if (libevdev_new_from_fd(infd, &a.dev) < 0) DIE("libevdev_new_from_fd");
-    fprintf(stderr, "Input device name: \"%s\"\n", libevdev_get_name(a.dev));
+    if (libevdev_new_from_fd(infd, &orig_dev) < 0) DIE("libevdev_new_from_fd");
+    fprintf(stderr, "Input device name: \"%s\"\n", libevdev_get_name(orig_dev));
     fprintf(stderr, "Input device ID: bus %#x vendor %#x product %#x\n",
-            libevdev_get_id_bustype(a.dev),
-            libevdev_get_id_vendor(a.dev),
-            libevdev_get_id_product(a.dev));
+            libevdev_get_id_bustype(orig_dev),
+            libevdev_get_id_vendor(orig_dev),
+            libevdev_get_id_product(orig_dev));
 
-    if (!libevdev_has_event_code(a.dev, EV_ABS, ABS_X) ||
-        !libevdev_has_event_code(a.dev, EV_ABS, ABS_Y)) {
+    if (!libevdev_has_event_code(orig_dev, EV_ABS, ABS_X) ||
+        !libevdev_has_event_code(orig_dev, EV_ABS, ABS_Y)) {
         DIE("This device has no ABS_X/ABS_Y (need a touchpad-like device)");
     }
 
     // 最初から元デバイスをgrab
-    int rc = libevdev_grab(a.dev, LIBEVDEV_GRAB);
-    if (rc < 0) DIE("Failed to grab device");
+    int rc = libevdev_grab(orig_dev, LIBEVDEV_GRAB);
+    if (rc < 0) DIE("Failed to grab device.");
 
-    // デバイスにホイールのcapabilityを追加
-    libevdev_enable_event_type(a.dev, EV_REL);
-    libevdev_enable_event_code(a.dev, EV_REL, REL_WHEEL, NULL);
-    libevdev_enable_event_code(a.dev, EV_REL, REL_WHEEL_HI_RES, NULL);
-    
-    if (!libevdev_has_event_code(a.dev, EV_REL, REL_WHEEL) ||
-        !libevdev_has_event_code(a.dev, EV_REL, REL_WHEEL_HI_RES)) {
-        DIE("Failed to add REL_WHEEL capability.");
-    }
-    
-    rc = libevdev_uinput_create_from_device(a.dev, LIBEVDEV_UINPUT_OPEN_MANAGED, &a.uidev);
-    if (rc < 0) DIE("Failed to create uinput device");
+    rc = libevdev_uinput_create_from_device(orig_dev, LIBEVDEV_UINPUT_OPEN_MANAGED, &pad_uidev);
+    if (rc < 0) DIE("Failed to create uinput touchpad device.");
 
-    const struct input_absinfo *xi = libevdev_get_abs_info(a.dev, ABS_X);
-    const struct input_absinfo *yi = libevdev_get_abs_info(a.dev, ABS_Y);
+    mouse_uidev = create_virtual_mouse();
+    if (!mouse_uidev) DIE("Failed to create uinput mouse device.");
+
+    const struct input_absinfo *xi = libevdev_get_abs_info(orig_dev, ABS_X);
+    const struct input_absinfo *yi = libevdev_get_abs_info(orig_dev, ABS_Y);
     a.x_min = xi->minimum; a.x_max = xi->maximum;
     a.y_min = yi->minimum; a.y_max = yi->maximum;
 
@@ -240,12 +231,12 @@ static void run(const char *device_path){
     while (1){
         // LOG("MODE=%d, grab=%d",state,a.grabbed);
         struct input_event ev;
-        int event_status = libevdev_next_event(a.dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+        int event_status = libevdev_next_event(orig_dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
         if (event_status == LIBEVDEV_READ_STATUS_SUCCESS) {
             // LOG("[Event check loop] event recieved: ev.type=%hu ev.code=%d ev.value=%d", ev.type, ev.code, ev.value);
             if (ev.type == EV_SYN && ev.code == SYN_DROPPED){
                 // 取りこぼし時は再同期
-                event_status = libevdev_next_event(a.dev, LIBEVDEV_READ_FLAG_SYNC, &ev);
+                event_status = libevdev_next_event(orig_dev, LIBEVDEV_READ_FLAG_SYNC, &ev);
             }
             
             event_type=ev.type; event_code=ev.code; event_value=ev.value;
@@ -255,7 +246,7 @@ static void run(const char *device_path){
                 (event_type==EV_ABS && event_code==ABS_MT_TRACKING_ID) ||
                 (event_type==EV_KEY && event_code==BTN_TOUCH)   
             ) {
-                int rc = libevdev_uinput_write_event(a.uidev, ev.type, ev.code, ev.value);
+                int rc = libevdev_uinput_write_event(pad_uidev, ev.type, ev.code, ev.value);
                 LOG("uinput event send: ev.type=%hu ev.code=%d ev.value=%d", ev.type, ev.code, ev.value);
                 if (rc<0){
                     DIE("write_event failed: %s\nev.type=%hu ev.code=%d ev.value=%d", strerror(-rc), ev.type, ev.code, ev.value);
@@ -292,7 +283,7 @@ static void run(const char *device_path){
                     }
                     break;
                 case SCROLLING:
-                    update_xy_while_scroll(curr_x, curr_y, &a);
+                    update_xy_while_scroll(curr_x, curr_y, &a, mouse_uidev);
                     break;
                 case END:
                     state=FIRST;
@@ -315,16 +306,10 @@ static void run(const char *device_path){
         }
     }
 
-    if (a.uidev) {
-        libevdev_uinput_destroy(a.uidev);
-        a.uidev = NULL;
-    }
-
-    if (a.dev) {
-        libevdev_grab(a.dev, LIBEVDEV_UNGRAB);
-        libevdev_free(a.dev);
-        a.dev = NULL;
-    }
+    libevdev_uinput_destroy(pad_uidev);
+    libevdev_uinput_destroy(mouse_uidev);
+    libevdev_grab(orig_dev, LIBEVDEV_UNGRAB);
+    libevdev_free(orig_dev);
 }
 
 static void usage(const char *prog){
