@@ -106,7 +106,9 @@ int main(int argc, char *argv[])
                                          LIBEVDEV_READ_FLAG_NORMAL |
                                          LIBEVDEV_READ_FLAG_BLOCKING,
                                          &ev);
-
+        if (ev.type!=0 || ev.code!=0 || ev.value!=0){
+            printf("ev.type=%hu ev.code=%d ev.value=%d\n", ev.type, ev.code, ev.value);
+        }
         if (status == LIBEVDEV_READ_STATUS_SUCCESS ||
             status == LIBEVDEV_READ_STATUS_SYNC) {
             // 取得したイベントをそのまま uinput デバイスに送る
