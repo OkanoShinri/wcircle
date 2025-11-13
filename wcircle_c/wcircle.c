@@ -99,12 +99,8 @@ static int setup_uinput(){
     return fd;
 }
 
-static void emit_rel(int fd, int code, int value){
+static void emit_syn(int fd){
     struct input_event ev;
-    memset(&ev, 0, sizeof(ev));
-    // clock_gettime(CLOCK_MONOTONIC, &ev.time);
-    ev.type = EV_REL; ev.code = code; ev.value = value;
-    if (write(fd, &ev, sizeof(ev)) < 0) perror("write REL");
 
     memset(&ev, 0, sizeof(ev));
     // clock_gettime(CLOCK_MONOTONIC, &ev.time);
@@ -112,13 +108,26 @@ static void emit_rel(int fd, int code, int value){
     if (write(fd, &ev, sizeof(ev)) < 0) perror("write SYN");
 }
 
+static void emit_uinput_event(int fd, int type, int code, int value){
+    struct input_event ev;
+    memset(&ev, 0, sizeof(ev));
+    // clock_gettime(CLOCK_MONOTONIC, &ev.time);
+    ev.type = type; ev.code = code; ev.value = value;
+    if (write(fd, &ev, sizeof(ev)) < 0) perror("write REL");
+    emit_syn(fd);
+}
+
+static void emit_rel(int fd, int code, int value){
+    emit_uinput_event(fd, EV_REL, code, value);
+}
+
 static void maybe_grab(app_t *a, int on){
     if (!a->cfg.grab_on_scroll) return;
-    if (on && !a->grabbed){
-        if (ioctl(libevdev_get_fd(a->dev), EVIOCGRAB, 1) == 0){
-            a->grabbed = 1;
-        }
-    } else if (!on && a->grabbed){
+    if (on){
+        ioctl(libevdev_get_fd(a->dev), EVIOCGRAB, 1);
+        a->grabbed = 1;
+        
+    } else {
         ioctl(libevdev_get_fd(a->dev), EVIOCGRAB, 0);
         a->grabbed = 0;
     }
@@ -170,6 +179,7 @@ static void update_xy_while_scroll(int x, int y, app_t *a){
         dir *= (a->cfg.invert_scroll) ? -1 : 1;
         int mode = (a->cfg.wheel_hi_res) ? REL_WHEEL_HI_RES : REL_WHEEL;
         emit_rel(a->uifd, mode, dir * a->cfg.wheel_step);
+        emit_syn(a->uifd);
         LOG("dir * a->cfg.wheel_step: %d\n",dir * a->cfg.wheel_step);
         a->accum_angle += dir * a->cfg.step_rad;
     }
