@@ -1,4 +1,3 @@
-#include <linux/input.h>
 #define _GNU_SOURCE
 #include <errno.h>
 #include <fcntl.h>
@@ -144,7 +143,7 @@ static void update_xy_while_scroll(int x, int y, app_t *a){
         memset(&ev, 0, sizeof(ev));
         ev.type = EV_REL; ev.code = code; ev.value = dir * a->cfg.wheel_step;
         if (libevdev_uinput_write_event(a->uidev, ev.type, ev.code, ev.value)<0) DIE("Failed to write EV_REL");
-
+        LOG("write scroll event: ev.type=%hu ev.code=%d ev.value=%d", ev.type, ev.code, ev.value);
         memset(&ev, 0, sizeof(ev));
         ev.type = EV_SYN; ev.code = SYN_REPORT; ev.value = 0;
         if (libevdev_uinput_write_event(a->uidev, ev.type, ev.code, ev.value)<0) DIE("Failed to write SYN");
@@ -160,7 +159,7 @@ static void run(const char *device_path){
     a.cfg = (config_t){
         .outer_ratio_min = 0.70,
         .outer_ratio_max = 1.415,
-        .start_arc_rad   = 18.0*DEG2RAD,
+        .start_arc_rad   = 10.0*DEG2RAD,
         .step_rad        = 18.0*DEG2RAD,
         .wheel_step      = 1,
         .wheel_hi_res    = 0,
@@ -186,6 +185,16 @@ static void run(const char *device_path){
     // 最初から元デバイスをgrab
     int rc = libevdev_grab(a.dev, LIBEVDEV_GRAB);
     if (rc < 0) DIE("Failed to grab device");
+
+    // デバイスにホイールのcapabilityを追加
+    libevdev_enable_event_type(a.dev, EV_REL);
+    libevdev_enable_event_code(a.dev, EV_REL, REL_WHEEL, NULL);
+    libevdev_enable_event_code(a.dev, EV_REL, REL_WHEEL_HI_RES, NULL);
+    
+    if (!libevdev_has_event_code(a.dev, EV_REL, REL_WHEEL) ||
+        !libevdev_has_event_code(a.dev, EV_REL, REL_WHEEL_HI_RES)) {
+        DIE("Failed to add REL_WHEEL capability.");
+    }
     
     rc = libevdev_uinput_create_from_device(a.dev, LIBEVDEV_UINPUT_OPEN_MANAGED, &a.uidev);
     if (rc < 0) DIE("Failed to create uinput device");
@@ -196,8 +205,6 @@ static void run(const char *device_path){
     a.y_min = yi->minimum; a.y_max = yi->maximum;
 
     double cx = (a.x_min + a.x_max) * 0.5, cy = (a.y_min + a.y_max) * 0.5;
-
-    // a.uifd = setup_uinput();
     LOG("ready. device=%s center=(%.1f,%.1f)", device_path, cx, cy);
 
     int curr_x = (int)cx, curr_y = (int)cy;
