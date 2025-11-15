@@ -37,6 +37,7 @@ typedef struct {
     int    wheel_step;        // REL_WHEEL の1発あたり値（一般的には ±1）
     int    wheel_hi_res;      // 高解像度を用いるか否か(1=REL_WHEEL_HI_RES, 0=REL_WHEEL)
     int    invert_scroll;     // 0=時計回りで下、1=時計回りで上
+    int    all_wheel;         // 
 } config_t;
 
 typedef struct {
@@ -70,6 +71,8 @@ static int handler(void* config, const char* section, const char* name,
         pconfig->wheel_hi_res = atoi(value);
     } else if (MATCH("wcircle", "invert_scroll")) {
         pconfig->invert_scroll = atoi(value);
+    } else if (MATCH("wcircle", "all_wheel")) {
+        pconfig->all_wheel = atoi(value);
     } else {
         return 0;
     }
@@ -127,7 +130,8 @@ static int is_touchpad(struct libevdev *dev) {
         return 1;
     return 0;
 }
-char* get_touchpad_device_path(void) {
+
+static char* get_touchpad_device_path(void) {
     DIR *dir = opendir("/dev/input");
     if (!dir) return NULL;
 
@@ -245,6 +249,7 @@ static void run(){
         .wheel_step      = 1,
         .wheel_hi_res    = 0,
         .invert_scroll   = 0,
+        .all_wheel       = 0,
     };
 
     if (ini_parse("/etc/wcircle/config.ini", handler, &a.cfg) < 0) {
@@ -315,12 +320,13 @@ static void run(){
             }
             
             event_type=ev.type; event_code=ev.code; event_value=ev.value;
-
+            
             // passthrough
-            if (state!=SCROLLING ||
-                (event_type==EV_ABS && event_code==ABS_MT_TRACKING_ID) ||
-                (event_type==EV_KEY && event_code==BTN_TOUCH)   
-            ) {
+            #define IS_TOUCH_EVENT(ev) \
+                ( ((ev).type == EV_ABS && (ev).code == ABS_MT_TRACKING_ID) || \
+                  ((ev).type == EV_KEY && (ev).code == BTN_TOUCH) )
+
+            if (!a.cfg.all_wheel && (state!=SCROLLING || IS_TOUCH_EVENT(ev))) {
                 int rc = libevdev_uinput_write_event(pad_uidev, ev.type, ev.code, ev.value);
                 if (rc<0){
                     DIE("write_event failed: %s\nev.type=%hu ev.code=%d ev.value=%d", strerror(-rc), ev.type, ev.code, ev.value);
@@ -335,8 +341,8 @@ static void run(){
             if (event_type == EV_SYN && event_code == SYN_REPORT && event_value == 0) {
                 switch (state) {
                 case FIRST:
-                    if (is_in_touch_area(curr_x, curr_y, &a)){
-                        state=STARTED_IN_AREA;
+                    if ((a.cfg.all_wheel) || (is_in_touch_area(curr_x, curr_y, &a))){
+                        state= a.cfg.all_wheel ? SCROLLING : STARTED_IN_AREA;
                         a.staying_in_area = true;
                         a.scrolling = false;
                         a.accum_angle = 0.0;

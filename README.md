@@ -35,6 +35,7 @@ step_deg=18           ; degrees per wheel step
 wheel_step=1          ; integer wheel step value sent with REL_WHEEL
 wheel_hi_res=0        ; use high-resolution wheel if available (1=yes, 0=no)
 invert_scroll=0       ; invert scroll direction (1=yes, 0=no)
+all_wheel=0           ; include the entire touchpad in scroll detection at all times
 pad_device_path=/dev/input/event0 ; if you want to explicitly specify touchpad device
 ```
 
