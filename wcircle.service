@@ -1,0 +1,12 @@
+[Unit]
+Description=Wcircle Service
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/wcircle
+Restart=always
+User=nobody
+Group=nogroup
+
+[Install]
+WantedBy=multi-user.target
