@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <libevdev-1.0/libevdev/libevdev.h>
 #include <libevdev-1.0/libevdev/libevdev-uinput.h>
+#include <dirent.h>
 #include "../inih/ini.h"
 
 #define DIE(...)  do { fprintf(stderr, __VA_ARGS__); fprintf(stderr, "\n"); exit(1);} while(0)
@@ -122,6 +123,57 @@ struct libevdev_uinput* create_virtual_mouse(void)
     return uidev;
 }
 
+static int is_touchpad(struct libevdev *dev) {
+    if (!libevdev_has_event_type(dev, EV_ABS))
+        return 0;
+
+    /* マルチタッチの ABS イベントを持つか */
+    if (libevdev_has_event_code(dev, EV_ABS, ABS_MT_POSITION_X) &&
+        libevdev_has_event_code(dev, EV_ABS, ABS_MT_POSITION_Y))
+        return 1;
+    return 0;
+}
+char* get_touchpad_device_path(void) {
+    DIR *dir = opendir("/dev/input");
+    if (!dir) return NULL;
+
+    struct dirent *de;
+    char path[256];
+
+    while ((de = readdir(dir)) != NULL) {
+        if (strncmp(de->d_name, "event", 5) != 0)
+            continue;
+
+        snprintf(path, sizeof(path), "/dev/input/%s", de->d_name);
+
+        int fd = open(path, O_RDONLY | O_NONBLOCK);
+        if (fd < 0) continue;
+
+        struct libevdev *dev = NULL;
+        if (libevdev_new_from_fd(fd, &dev) < 0) {
+            close(fd);
+            continue;
+        }
+
+        int match = 0;
+        if (is_touchpad(dev)) {
+            match = 1;
+        }
+
+        libevdev_free(dev);
+        close(fd);
+
+        if (match) {
+            closedir(dir);
+            /* 呼び出し側が free() すべき */
+            return strdup(path);
+        }
+    }
+
+    closedir(dir);
+    return NULL;
+}
+
 // 角度差分を [-pi, pi] に正規化
 static inline double angle_diff(double a, double b){ 
     double d = a - b;
@@ -188,9 +240,10 @@ static void update_xy_while_scroll(int x, int y, app_t *a, struct libevdev_uinpu
 }
     
 
-static void run(const char *device_path){
+static void run(){
     app_t a = {0};
     a.cfg = (config_t){
+        .pad_device_path = get_touchpad_device_path(),
         .outer_ratio_min = 0.70,
         .outer_ratio_max = 1.415,
         .start_arc_rad   = 5.0*DEG2RAD,
@@ -211,7 +264,7 @@ static void run(const char *device_path){
     struct libevdev_uinput *pad_uidev;
     struct libevdev_uinput *mouse_uidev;
     
-    int infd = open(device_path, O_RDONLY | O_NONBLOCK);
+    int infd = open(a.cfg.pad_device_path, O_RDONLY | O_NONBLOCK);
     if (infd < 0) DIE("open input: %s", strerror(errno));
 
     if (libevdev_new_from_fd(infd, &orig_dev) < 0) DIE("libevdev_new_from_fd");
@@ -242,7 +295,7 @@ static void run(const char *device_path){
     a.y_min = yi->minimum; a.y_max = yi->maximum;
 
     double cx = (a.x_min + a.x_max) * 0.5, cy = (a.y_min + a.y_max) * 0.5;
-    LOG("ready. device=%s center=(%.1f,%.1f)", device_path, cx, cy);
+    LOG("ready. device=%s center=(%.1f,%.1f)", a.cfg.pad_device_path, cx, cy);
 
     int curr_x = (int)cx, curr_y = (int)cy;
     bool is_x_updated=false, is_y_updated=false;
@@ -341,7 +394,6 @@ static void usage(const char *prog){
 }
 
 int main(int argc, char **argv){
-    if (argc < 2){ usage(argv[0]); return 1; }
-    run(argv[1]);
+    run();
     return 0;
 }
