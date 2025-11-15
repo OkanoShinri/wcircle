@@ -180,7 +180,6 @@ static void update_xy_while_scroll(int x, int y, app_t *a, struct libevdev_uinpu
         ev.type = EV_SYN; ev.code = SYN_REPORT; ev.value = 0;
         if (libevdev_uinput_write_event(mouse_uidev, ev.type, ev.code, ev.value)<0) DIE("Failed to write SYN");
 
-        LOG("dir * a->cfg.wheel_step: %d\n",dir * a->cfg.wheel_step);
         a->accum_angle += dir * a->cfg.step_rad;
     }
 }
@@ -197,12 +196,6 @@ static void run(const char *device_path){
         .wheel_hi_res    = 0,
         .invert_scroll   = 0,
     };
-
-    const char *home = getenv("HOME");
-    if (!home) {
-        fprintf(stderr, "HOME is not set.\n");
-        return;
-    }
 
     if (ini_parse("/etc/wcircle/config.ini", handler, &a.cfg) < 0) {
         LOG("Can't load '/etc/wcircle/config.ini'");
@@ -290,7 +283,6 @@ static void run(const char *device_path){
             if (event_type == EV_ABS && event_code == ABS_Y) curr_y=event_value;
 
             if (event_type == EV_SYN && event_code == SYN_REPORT && event_value == 0) {
-                //イベント実行
                 switch (state) {
                 case FIRST:
                     if (is_in_touch_area(curr_x, curr_y, &a)){
@@ -322,7 +314,6 @@ static void run(const char *device_path){
                 default:
                     break;
                 }
-                printf("\n");
             }
 
             
