@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <libevdev-1.0/libevdev/libevdev.h>
 #include <libevdev-1.0/libevdev/libevdev-uinput.h>
+#include "../inih/ini.h"
 
 #define DIE(...)  do { fprintf(stderr, __VA_ARGS__); fprintf(stderr, "\n"); exit(1);} while(0)
 
@@ -33,21 +34,17 @@
 #define RAD2DEG 180/M_PI
 
 typedef struct {
-    // 検出パラメータ（後で設定ファイル化）
     double outer_ratio_min;   // 外周リングの内側境界（中心からの比）
     double outer_ratio_max;   // 外周リングの外側境界（比)
     double start_arc_rad;     // スクロール開始判定: 累積角度 [rad]
     double step_rad;          // 1ホイール発火あたりの角度 [rad]（小さくすると高分解能）
     int    wheel_step;        // REL_WHEEL の1発あたり値（一般的には ±1）
     int    wheel_hi_res;      // 高解像度を用いるか否か(1=REL_WHEEL_HI_RES, 0=REL_WHEEL)
-    bool   invert_scroll;     // false=時計回りで下、true=時計回りで上
+    int    invert_scroll;     // 0=時計回りで下、1=時計回りで上
 } config_t;
 
 typedef struct {
-    // デバイス座標
     int x_min, x_max, y_min, y_max;
-
-    // 状態
     double last_angle;     // unwrap 済みの直前角
     double accum_angle;    // 累積角
     bool staying_in_area;  // 開始判定エリアに留まっているか(開始判定用)
@@ -55,12 +52,30 @@ typedef struct {
     config_t cfg;
 } app_t;
 
-// 角度差分を [-pi, pi] に正規化
-static inline double angle_diff(double a, double b){ 
-    double d = a - b;
-    while (d >  M_PI) d -= 2*M_PI;
-    while (d < -M_PI) d += 2*M_PI;
-    return d;
+static int handler(void* config, const char* section, const char* name,
+                   const char* value)
+{
+    config_t* pconfig = (config_t*)config;
+
+    #define MATCH(s, n) strcmp(section, s) == 0 && strcmp(name, n) == 0
+    if (MATCH("wcircle", "outer_ratio_min")) {
+        pconfig->outer_ratio_min = atof(value);
+    } else if (MATCH("wcircle", "outer_ratio_max")) {
+        pconfig->outer_ratio_max = atof(value);
+    } else if (MATCH("wcircle", "start_arc_rad")) {
+        pconfig->start_arc_rad = atof(value)*DEG2RAD;
+    } else if (MATCH("wcircle", "step_rad")) {
+        pconfig->step_rad = atof(value)*DEG2RAD;
+    } else if (MATCH("wcircle", "wheel_step")) {
+        pconfig->wheel_step = atoi(value);
+    } else if (MATCH("wcircle", "wheel_hi_res")) {
+        pconfig->wheel_hi_res = atoi(value);
+    } else if (MATCH("wcircle", "invert_scroll")) {
+        pconfig->invert_scroll = atoi(value);
+    } else {
+        return 0;
+    }
+    return 1;
 }
 
 struct libevdev_uinput* create_virtual_mouse(void)
@@ -104,6 +119,14 @@ struct libevdev_uinput* create_virtual_mouse(void)
     return uidev;
 }
 
+// 角度差分を [-pi, pi] に正規化
+static inline double angle_diff(double a, double b){ 
+    double d = a - b;
+    while (d >  M_PI) d -= 2*M_PI;
+    while (d < -M_PI) d += 2*M_PI;
+    return d;
+}
+
 static bool is_in_touch_area(int x, int y, app_t *a){
     double nx = (double)(x - a->x_min) / (double)(a->x_max - a->x_min) * 2.0 - 1.0;
     double ny = (double)(y - a->y_min) / (double)(a->y_max - a->y_min) * 2.0 - 1.0;
@@ -143,7 +166,6 @@ static void update_xy_while_scroll(int x, int y, app_t *a, struct libevdev_uinpu
     a->last_angle = a->last_angle + d;
     a->accum_angle += d;
 
-    // 発火
     while (fabs(a->accum_angle) >= a->cfg.step_rad){
         int dir = (a->accum_angle > 0) ? -1 : 1;
         dir *= (a->cfg.invert_scroll) ? -1 : 1;
@@ -158,7 +180,6 @@ static void update_xy_while_scroll(int x, int y, app_t *a, struct libevdev_uinpu
         ev.type = EV_SYN; ev.code = SYN_REPORT; ev.value = 0;
         if (libevdev_uinput_write_event(mouse_uidev, ev.type, ev.code, ev.value)<0) DIE("Failed to write SYN");
 
-        LOG("dir * a->cfg.wheel_step: %d\n",dir * a->cfg.wheel_step);
         a->accum_angle += dir * a->cfg.step_rad;
     }
 }
@@ -173,9 +194,16 @@ static void run(const char *device_path){
         .step_rad        = 18.0*DEG2RAD,
         .wheel_step      = 1,
         .wheel_hi_res    = 0,
-        .invert_scroll   = false,
+        .invert_scroll   = 0,
     };
 
+    if (ini_parse("/etc/wcircle/config.ini", handler, &a.cfg) < 0) {
+        LOG("Can't load '/etc/wcircle/config.ini'");
+        if (ini_parse("config.ini", handler, &a.cfg) < 0) {
+            LOG("Can't load 'config.ini'  from current directory. The default settings will be used.");
+        }
+    }
+    
     struct libevdev *orig_dev;
     struct libevdev_uinput *pad_uidev;
     struct libevdev_uinput *mouse_uidev;
@@ -229,13 +257,10 @@ static void run(const char *device_path){
     
     // Event check loop
     while (1){
-        // LOG("MODE=%d, grab=%d",state,a.grabbed);
         struct input_event ev;
         int event_status = libevdev_next_event(orig_dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
         if (event_status == LIBEVDEV_READ_STATUS_SUCCESS) {
-            // LOG("[Event check loop] event recieved: ev.type=%hu ev.code=%d ev.value=%d", ev.type, ev.code, ev.value);
             if (ev.type == EV_SYN && ev.code == SYN_DROPPED){
-                // 取りこぼし時は再同期
                 event_status = libevdev_next_event(orig_dev, LIBEVDEV_READ_FLAG_SYNC, &ev);
             }
             
@@ -247,12 +272,10 @@ static void run(const char *device_path){
                 (event_type==EV_KEY && event_code==BTN_TOUCH)   
             ) {
                 int rc = libevdev_uinput_write_event(pad_uidev, ev.type, ev.code, ev.value);
-                LOG("uinput event send: ev.type=%hu ev.code=%d ev.value=%d", ev.type, ev.code, ev.value);
                 if (rc<0){
                     DIE("write_event failed: %s\nev.type=%hu ev.code=%d ev.value=%d", strerror(-rc), ev.type, ev.code, ev.value);
                 }
             }
-            else LOG("[Event check loop] this event will not send: ev.type=%hu ev.code=%d ev.value=%d", ev.type, ev.code, ev.value);
             
             if (event_type == EV_KEY && event_code == BTN_TOUCH && event_value == 1) state=FIRST;
             if (event_type == EV_KEY && event_code == BTN_TOUCH && event_value == 0) state=END;
@@ -260,7 +283,6 @@ static void run(const char *device_path){
             if (event_type == EV_ABS && event_code == ABS_Y) curr_y=event_value;
 
             if (event_type == EV_SYN && event_code == SYN_REPORT && event_value == 0) {
-                //イベント実行
                 switch (state) {
                 case FIRST:
                     if (is_in_touch_area(curr_x, curr_y, &a)){
@@ -292,7 +314,6 @@ static void run(const char *device_path){
                 default:
                     break;
                 }
-                printf("\n");
             }
 
             
