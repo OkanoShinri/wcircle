@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <libevdev-1.0/libevdev/libevdev.h>
 #include <libevdev-1.0/libevdev/libevdev-uinput.h>
+#include "../inih/ini.h"
 
 #define DIE(...)  do { fprintf(stderr, __VA_ARGS__); fprintf(stderr, "\n"); exit(1);} while(0)
 
@@ -33,21 +34,17 @@
 #define RAD2DEG 180/M_PI
 
 typedef struct {
-    // 検出パラメータ（後で設定ファイル化）
     double outer_ratio_min;   // 外周リングの内側境界（中心からの比）
     double outer_ratio_max;   // 外周リングの外側境界（比)
     double start_arc_rad;     // スクロール開始判定: 累積角度 [rad]
     double step_rad;          // 1ホイール発火あたりの角度 [rad]（小さくすると高分解能）
     int    wheel_step;        // REL_WHEEL の1発あたり値（一般的には ±1）
     int    wheel_hi_res;      // 高解像度を用いるか否か(1=REL_WHEEL_HI_RES, 0=REL_WHEEL)
-    bool   invert_scroll;     // false=時計回りで下、true=時計回りで上
+    int    invert_scroll;     // 0=時計回りで下、1=時計回りで上
 } config_t;
 
 typedef struct {
-    // デバイス座標
     int x_min, x_max, y_min, y_max;
-
-    // 状態
     double last_angle;     // unwrap 済みの直前角
     double accum_angle;    // 累積角
     bool staying_in_area;  // 開始判定エリアに留まっているか(開始判定用)
@@ -55,12 +52,30 @@ typedef struct {
     config_t cfg;
 } app_t;
 
-// 角度差分を [-pi, pi] に正規化
-static inline double angle_diff(double a, double b){ 
-    double d = a - b;
-    while (d >  M_PI) d -= 2*M_PI;
-    while (d < -M_PI) d += 2*M_PI;
-    return d;
+static int handler(void* config, const char* section, const char* name,
+                   const char* value)
+{
+    config_t* pconfig = (config_t*)config;
+
+    #define MATCH(s, n) strcmp(section, s) == 0 && strcmp(name, n) == 0
+    if (MATCH("wcircle", "outer_ratio_min")) {
+        pconfig->outer_ratio_min = atof(value);
+    } else if (MATCH("wcircle", "outer_ratio_max")) {
+        pconfig->outer_ratio_max = atof(value);
+    } else if (MATCH("wcircle", "start_arc_rad")) {
+        pconfig->start_arc_rad = atof(value)*DEG2RAD;
+    } else if (MATCH("wcircle", "step_rad")) {
+        pconfig->step_rad = atof(value)*DEG2RAD;
+    } else if (MATCH("wcircle", "wheel_step")) {
+        pconfig->wheel_step = atoi(value);
+    } else if (MATCH("wcircle", "wheel_hi_res")) {
+        pconfig->wheel_hi_res = atoi(value);
+    } else if (MATCH("wcircle", "invert_scroll")) {
+        pconfig->invert_scroll = atoi(value);
+    } else {
+        return 0;
+    }
+    return 1;
 }
 
 struct libevdev_uinput* create_virtual_mouse(void)
@@ -102,6 +117,14 @@ struct libevdev_uinput* create_virtual_mouse(void)
     }
 
     return uidev;
+}
+
+// 角度差分を [-pi, pi] に正規化
+static inline double angle_diff(double a, double b){ 
+    double d = a - b;
+    while (d >  M_PI) d -= 2*M_PI;
+    while (d < -M_PI) d += 2*M_PI;
+    return d;
 }
 
 static bool is_in_touch_area(int x, int y, app_t *a){
@@ -175,6 +198,25 @@ static void run(const char *device_path){
         .wheel_hi_res    = 0,
         .invert_scroll   = false,
     };
+
+    const char *home = getenv("HOME");
+    if (!home) {
+        fprintf(stderr, "HOME is not set.\n");
+        return;
+    }
+
+    char path[512];
+    snprintf(path, sizeof(path), "%s/.config/wcircle/config.ini", home);
+    if (ini_parse(path, handler, &a.cfg) < 0) {
+        LOG("Can't load '%s'\n",path);
+        if (ini_parse("/etc/wcircle/config.ini", handler, &a.cfg) < 0) {
+            LOG("Can't load '/etc/wcircle/config.ini'");
+            if (ini_parse("config.ini", handler, &a.cfg) < 0) {
+                DIE("Can't load 'config.ini'  from current directory.");
+            }
+        }
+    }
+
 
     struct libevdev *orig_dev;
     struct libevdev_uinput *pad_uidev;
