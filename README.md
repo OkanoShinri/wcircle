@@ -1,18 +1,11 @@
 # wcircle
 Wayland Circular Scroll Daemon
 
-# Build
+# Install
 
 ```bash
-gcc wcircle.c -o wcircle.bin $(pkg-config --cflags --libs libevdev) -lm
-```
-
-# Run
-
-Root privileges are required:
-
-```bash
-sudo ./wcircle.bin
+make
+sudo make install
 ```
 
 ## Configuration
