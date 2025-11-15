@@ -166,7 +166,6 @@ static void update_xy_while_scroll(int x, int y, app_t *a, struct libevdev_uinpu
     a->last_angle = a->last_angle + d;
     a->accum_angle += d;
 
-    // 発火
     while (fabs(a->accum_angle) >= a->cfg.step_rad){
         int dir = (a->accum_angle > 0) ? -1 : 1;
         dir *= (a->cfg.invert_scroll) ? -1 : 1;
@@ -196,7 +195,7 @@ static void run(const char *device_path){
         .step_rad        = 18.0*DEG2RAD,
         .wheel_step      = 1,
         .wheel_hi_res    = 0,
-        .invert_scroll   = false,
+        .invert_scroll   = 0,
     };
 
     const char *home = getenv("HOME");
@@ -205,19 +204,13 @@ static void run(const char *device_path){
         return;
     }
 
-    char path[512];
-    snprintf(path, sizeof(path), "%s/.config/wcircle/config.ini", home);
-    if (ini_parse(path, handler, &a.cfg) < 0) {
-        LOG("Can't load '%s'\n",path);
-        if (ini_parse("/etc/wcircle/config.ini", handler, &a.cfg) < 0) {
-            LOG("Can't load '/etc/wcircle/config.ini'");
-            if (ini_parse("config.ini", handler, &a.cfg) < 0) {
-                DIE("Can't load 'config.ini'  from current directory.");
-            }
+    if (ini_parse("/etc/wcircle/config.ini", handler, &a.cfg) < 0) {
+        LOG("Can't load '/etc/wcircle/config.ini'");
+        if (ini_parse("config.ini", handler, &a.cfg) < 0) {
+            LOG("Can't load 'config.ini'  from current directory. The default settings will be used.");
         }
     }
-
-
+    
     struct libevdev *orig_dev;
     struct libevdev_uinput *pad_uidev;
     struct libevdev_uinput *mouse_uidev;
@@ -271,13 +264,10 @@ static void run(const char *device_path){
     
     // Event check loop
     while (1){
-        // LOG("MODE=%d, grab=%d",state,a.grabbed);
         struct input_event ev;
         int event_status = libevdev_next_event(orig_dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
         if (event_status == LIBEVDEV_READ_STATUS_SUCCESS) {
-            // LOG("[Event check loop] event recieved: ev.type=%hu ev.code=%d ev.value=%d", ev.type, ev.code, ev.value);
             if (ev.type == EV_SYN && ev.code == SYN_DROPPED){
-                // 取りこぼし時は再同期
                 event_status = libevdev_next_event(orig_dev, LIBEVDEV_READ_FLAG_SYNC, &ev);
             }
             
@@ -289,12 +279,10 @@ static void run(const char *device_path){
                 (event_type==EV_KEY && event_code==BTN_TOUCH)   
             ) {
                 int rc = libevdev_uinput_write_event(pad_uidev, ev.type, ev.code, ev.value);
-                LOG("uinput event send: ev.type=%hu ev.code=%d ev.value=%d", ev.type, ev.code, ev.value);
                 if (rc<0){
                     DIE("write_event failed: %s\nev.type=%hu ev.code=%d ev.value=%d", strerror(-rc), ev.type, ev.code, ev.value);
                 }
             }
-            else LOG("[Event check loop] this event will not send: ev.type=%hu ev.code=%d ev.value=%d", ev.type, ev.code, ev.value);
             
             if (event_type == EV_KEY && event_code == BTN_TOUCH && event_value == 1) state=FIRST;
             if (event_type == EV_KEY && event_code == BTN_TOUCH && event_value == 0) state=END;
