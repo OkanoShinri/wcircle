@@ -7,23 +7,12 @@ Wayland Circular Scroll Daemon
 gcc wcircle.c -o wcircle.bin $(pkg-config --cflags --libs libevdev) -lm
 ```
 
-# Before Running
-
-Use the `evtest` command to identify your touchpad device.
-
-```bash
-evtest
-```
-
-From the output, locate your touchpad and note the corresponding device file
-(for example, `/dev/input/eventX`).
-
 # Run
 
 Root privileges are required:
 
 ```bash
-sudo ./wcircle.bin /dev/input/eventX
+sudo ./wcircle.bin
 ```
 
 ## Configuration
@@ -46,6 +35,7 @@ step_deg=18           ; degrees per wheel step
 wheel_step=1          ; integer wheel step value sent with REL_WHEEL
 wheel_hi_res=0        ; use high-resolution wheel if available (1=yes, 0=no)
 invert_scroll=0       ; invert scroll direction (1=yes, 0=no)
+pad_device_path=/dev/input/event0 ; if you want to explicitly specify touchpad device
 ```
 
 # Troubleshooting
