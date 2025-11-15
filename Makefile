@@ -1,6 +1,9 @@
 CC = gcc
 TARGET = wcircle.bin
 SRC = wcircle/wcircle.c
+PKG_CFLAGS = $(shell pkg-config --cflags libevdev)
+PKG_LIBS   = $(shell pkg-config --libs libevdev)
+LDLIBS = $(PKG_LIBS) -lm
 
 PREFIX = /usr/local
 BINDIR = $(PREFIX)/bin
@@ -14,18 +17,17 @@ CONFIG_FILE = config.ini
 all: $(TARGET)
 
 $(TARGET): $(SRC)
-	$(CC) $(SRC) inih/ini.c -o $(TARGET) $(pkg-config --cflags --libs libevdev) -lm
+	$(CC) $(SRC) inih/ini.c -o $(TARGET) $(LDLIBS)
 
 install: $(TARGET)
-	mkdir -p $(BINDIR)/$(TARGET)
+	mkdir -p $(BINDIR)
 	install -m 755 $(TARGET) $(BINDIR)/$(TARGET)
 	mkdir -p $(ETCDIR)
 	install -m 644 $(CONFIG_FILE) $(ETCDIR)/$(CONFIG_FILE)
 	install -m 644 $(SERVICE_FILE) $(SYSTEMD_DIR)/$(SERVICE_FILE)
 
 	systemctl daemon-reload
-	systemctl enable $(SERVICE_FILE)
-	systemctl start $(SERVICE_FILE)
+	systemctl enable --now $(SERVICE_FILE)
 	
 uninstall:
 	-systemctl stop $(SERVICE_FILE)

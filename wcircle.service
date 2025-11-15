@@ -3,10 +3,8 @@ Description=Wcircle Service
 After=network.target
 
 [Service]
-ExecStart=/usr/local/bin/wcircle
+ExecStart=/usr/local/bin/wcircle.bin
 Restart=always
-User=nobody
-Group=nogroup
 
 [Install]
 WantedBy=multi-user.target
