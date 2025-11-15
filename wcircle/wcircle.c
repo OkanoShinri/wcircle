@@ -34,6 +34,7 @@
 #define RAD2DEG 180/M_PI
 
 typedef struct {
+    char* pad_device_path;    // タッチパッドデバイスのパス
     double outer_ratio_min;   // 外周リングの内側境界（中心からの比）
     double outer_ratio_max;   // 外周リングの外側境界（比)
     double start_arc_rad;     // スクロール開始判定: 累積角度 [rad]
@@ -58,7 +59,9 @@ static int handler(void* config, const char* section, const char* name,
     config_t* pconfig = (config_t*)config;
 
     #define MATCH(s, n) strcmp(section, s) == 0 && strcmp(name, n) == 0
-    if (MATCH("wcircle", "outer_ratio_min")) {
+    if (MATCH("wcircle", "pad_device_path")){
+        pconfig->pad_device_path = strdup(value);
+    } else if (MATCH("wcircle", "outer_ratio_min")) {
         pconfig->outer_ratio_min = atof(value);
     } else if (MATCH("wcircle", "outer_ratio_max")) {
         pconfig->outer_ratio_max = atof(value);
@@ -326,7 +329,7 @@ static void run(const char *device_path){
             break;
         }
     }
-
+    if (a.cfg.pad_device_path) free((void*)a.cfg.pad_device_path);
     libevdev_uinput_destroy(pad_uidev);
     libevdev_uinput_destroy(mouse_uidev);
     libevdev_grab(orig_dev, LIBEVDEV_UNGRAB);
