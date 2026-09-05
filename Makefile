@@ -1,8 +1,9 @@
 CC = gcc
 TARGET = wcircle.bin
-SRC = wcircle/wcircle.c
+SRC = wcircle.c
 PKG_CFLAGS = $(shell pkg-config --cflags libevdev)
 PKG_LIBS   = $(shell pkg-config --libs libevdev)
+CFLAGS = $(PKG_CFLAGS)
 LDLIBS = $(PKG_LIBS) -lm
 
 PREFIX = /usr/local
@@ -17,7 +18,7 @@ CONFIG_FILE = config.ini
 all: $(TARGET)
 
 $(TARGET): $(SRC)
-	$(CC) $(SRC) inih/ini.c -o $(TARGET) $(LDLIBS)
+	$(CC) $(CFLAGS) $(SRC) inih/ini.c -o $(TARGET) $(LDLIBS)
 
 install: $(TARGET)
 	mkdir -p $(BINDIR)

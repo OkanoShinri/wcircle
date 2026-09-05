@@ -31,26 +31,3 @@ invert_scroll=0       ; invert scroll direction (1=yes, 0=no)
 all_wheel=0           ; include the entire touchpad in scroll detection at all times
 pad_device_path=/dev/input/event0 ; if you want to explicitly specify touchpad device
 ```
-
-# Troubleshooting
-
-If you encounter libevdev-related errors during compilation, check the location of `libevdev.h`:
-
-```bash
-find / -name "libevdev.h" 2>/dev/null
-```
-
-On my system, it was located at:
-
-```
-/usr/include/libevdev-1.0/libevdev/libevdev.h
-```
-
-However, this may differ depending on your environment.
-If the location is different, modify the include path at the beginning of `wcircle.c`:
-
-```c
-#include <libevdev-1.0/libevdev/libevdev.h>   // <-- Update this path
-```
-
----
