@@ -4,6 +4,8 @@ Wayland Circular Scroll Daemon
 # Install
 
 ```bash
+git clone https://github.com/OkanoShinri/wcircle.git
+cd wcircle
 make
 sudo make install
 ```
