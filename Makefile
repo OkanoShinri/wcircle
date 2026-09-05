@@ -1,5 +1,5 @@
 CC = gcc
-TARGET = wcircle.bin
+TARGET = wcircle
 SRC = wcircle.c
 PKG_CFLAGS = $(shell pkg-config --cflags libevdev)
 PKG_LIBS   = $(shell pkg-config --libs libevdev)

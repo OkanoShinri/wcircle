@@ -11,7 +11,7 @@
 #include <libevdev-1.0/libevdev/libevdev.h>
 #include <libevdev-1.0/libevdev/libevdev-uinput.h>
 #include <dirent.h>
-#include "../inih/ini.h"
+#include "inih/ini.h"
 
 #define DIE(...)  do { fprintf(stderr, __VA_ARGS__); fprintf(stderr, "\n"); exit(1);} while(0)
 

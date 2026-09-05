@@ -3,7 +3,7 @@ Description=Wcircle Service
 After=network.target
 
 [Service]
-ExecStart=/usr/local/bin/wcircle.bin
+ExecStart=/usr/local/bin/wcircle
 Restart=always
 
 [Install]
